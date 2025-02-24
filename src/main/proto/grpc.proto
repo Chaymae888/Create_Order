@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+package org.example.create_order.models;
+
+// Product Service Definition
+service ProductService {
+  rpc GetProductById (ProductRequest) returns (ProductResponse);
+}
+
+// Request Message
+message ProductRequest {
+  string product_id = 1;
+}
+
+// Response Message
+message ProductResponse {
+  string product_id = 1;
+  string name = 2;
+  string description = 3;
+  double price = 4;
+  int32 quantity = 5;
+}
