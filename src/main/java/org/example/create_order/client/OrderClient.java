@@ -8,7 +8,7 @@ import org.example.create_order.models.ProductServiceGrpc;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-
+//
 @Component
 public class OrderClient {
 
