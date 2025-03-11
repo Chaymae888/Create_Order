@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.Locale;
@@ -37,10 +38,9 @@ public class GlobalExceptionHandler {
     }
     // Handle resource not found
     @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<String> handleResourceNotFound(ProductNotFoundException ex , HttpServletRequest request) {
-        String errorMessage = getLocalizedMessage("error.invalidParameters", request);
-
-        return new ResponseEntity<>(errorMessage+ ex.getMessage(), HttpStatus.NOT_FOUND);
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<String> handleProductNotFoundException(ProductNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
 

@@ -1,6 +1,7 @@
 package org.example.create_order.controllers;
 
 import org.example.create_order.client.OrderClient;
+import org.example.create_order.exceptions.ProductNotFoundException;
 import org.example.create_order.models.Order;
 import org.example.create_order.models.Product;
 import org.example.create_order.models.ProductResponse;
@@ -69,23 +70,23 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<EntityModel<Order>> createOrder(@RequestBody Order order) {
-        // Fetch product details from the ProductService
-        ProductResponse productResponse = orderClient.getProductById(order.getProductId());
+        try {
+            ProductResponse productResponse = orderClient.getProductById(order.getProductId());
 
-        // Convert ProductResponse to Product
-        Product product = new Product();
-        product.setId(productResponse.getProductId());
-        product.setName(productResponse.getName());
-        product.setDescription(productResponse.getDescription());
-        product.setPrice(productResponse.getPrice());
-        product.setQuantity(productResponse.getQuantity());
+            Product product = new Product();
+            product.setId(productResponse.getProductId());
+            product.setName(productResponse.getName());
+            product.setDescription(productResponse.getDescription());
+            product.setPrice(productResponse.getPrice());
+            product.setQuantity(productResponse.getQuantity());
 
-        Order createdOrder = orderService.createOrder(product, order);
+            Order createdOrder = orderService.createOrder(product, order);
 
-        // Return the created order as a response
-        return ResponseEntity.ok(EntityModel.of(createdOrder,
-                linkTo(methodOn(OrderController.class).getSingleOrder(createdOrder.getId())).withSelfRel()));
-    }
+            return ResponseEntity.ok(EntityModel.of(createdOrder,
+                    linkTo(methodOn(OrderController.class).getSingleOrder(createdOrder.getId())).withSelfRel()));
+        }catch(ProductNotFoundException ex){
+            throw ex;
+        }}
 
 
     }

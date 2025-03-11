@@ -2,6 +2,9 @@ package org.example.create_order.client;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import org.example.create_order.exceptions.ProductNotFoundException;
 import org.example.create_order.models.ProductRequest;
 import org.example.create_order.models.ProductResponse;
 import org.example.create_order.models.ProductServiceGrpc;
@@ -17,29 +20,25 @@ public class OrderClient {
 
     @PostConstruct
     private void init() {
-        // Initialize the communication channel with the gRPC server address and port
         channel = ManagedChannelBuilder.forAddress("localhost", 9090)
-                .usePlaintext() // For simplicity, use plaintext (no TLS)
+                .usePlaintext()
                 .build();
 
-        // Initialize the blocking/synchronous stub for ProductService
         productServiceBlockingStub = ProductServiceGrpc.newBlockingStub(channel);
     }
-
-    /**
-     * Fetches product details by ID using the ProductService gRPC server.
-     *
-     * @param productId The ID of the product to fetch.
-     * @return ProductResponse containing product details.
-     */
     public ProductResponse getProductById(String productId) {
-        // Create a ProductRequest with the given product ID
         ProductRequest request = ProductRequest.newBuilder()
                 .setProductId(productId)
                 .build();
-
-        // Call the getProductById method on the server using the stub
-        return productServiceBlockingStub.getProductById(request);
+        try {
+            return productServiceBlockingStub.getProductById(request);
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                throw new ProductNotFoundException("Product not found with ID: " + productId);
+            } else {
+                throw new RuntimeException("Failed to retrieve product: " + e.getMessage(), e);
+            }
+        }
     }
 
 

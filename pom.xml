@@ -97,7 +97,7 @@
         <!-- gRPC Dependencies -->
         <dependency>
             <groupId>io.grpc</groupId>
-            <artifactId>grpc-netty-shaded</artifactId> <!-- Use grpc-netty-shaded instead of grpc-netty -->
+            <artifactId>grpc-netty-shaded</artifactId>
             <version>${grpc.version}</version>
         </dependency>
         <dependency>

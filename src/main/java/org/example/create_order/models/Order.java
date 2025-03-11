@@ -19,6 +19,7 @@ public class Order {
     private Double price;
     private String productId;
     private int quantity;
+    private String state ;
 
     public String getId() {
         return id;
@@ -34,5 +35,8 @@ public class Order {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+    public void setState(String state) {
+        this.state = state;
     }
 }

@@ -26,19 +26,8 @@ public class OrderService {
     }
 
     public Order createOrder(Product product,Order order) {
-        validateOrder(product,order);
+        order.setPrice(order.getQuantity() * product.getPrice());
+        order.setState("CREATED");
         return orderRepository.save(order);
     }
-
-    private void validateOrder(Product product, Order order) {
-
-        // Check if order quantity exceeds product quantity
-        if (order.getQuantity() > product.getQuantity()) {
-            throw new RuntimeException("The quantity surpasses the product's available quantity");
-        } else {
-            order.setPrice(order.getQuantity() * product.getPrice());
-        }
-    }
-
-
 }
