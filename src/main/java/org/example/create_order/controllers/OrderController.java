@@ -1,6 +1,7 @@
 package org.example.create_order.controllers;
 
 import org.example.create_order.client.OrderClient;
+import org.example.create_order.exceptions.ProductNotFoundException;
 import org.example.create_order.models.Order;
 import org.example.create_order.models.Product;
 import org.example.create_order.models.ProductResponse;
@@ -70,20 +71,18 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<EntityModel<Order>> createOrder(@RequestBody Order order) {
-        // Fetch product details from the ProductService using gRPC client
-        System.out.println("Client sends create order request for product ID: " + order.getProductId());
-        ProductResponse productResponse = orderClient.getProductById(order.getProductId());
+        try {
 
-        // Convert ProductResponse to Product
-        Product product = new Product();
-        product.setId(productResponse.getProductId());
-        product.setName(productResponse.getName());
-        product.setDescription(productResponse.getDescription());
-        product.setPrice(productResponse.getPrice());
-        product.setQuantity(productResponse.getQuantity());
+            System.out.println("Client sends create order request for product ID: " + order.getProductId());
+            ProductResponse productResponse = orderClient.getProductById(order.getProductId());
 
-        // Set the initial state to CREATED
-        order.setState(Order.OrderState.CREATED);
+            Product product = new Product();
+            product.setId(productResponse.getProductId());
+            product.setName(productResponse.getName());
+            product.setDescription(productResponse.getDescription());
+            product.setPrice(productResponse.getPrice());
+            product.setQuantity(productResponse.getQuantity());
+
 
         // Create the order and process it synchronously
         Order createdOrder = orderService.createAndProcessOrder(product, order);
@@ -93,5 +92,9 @@ public class OrderController {
 
         return ResponseEntity.ok(EntityModel.of(createdOrder,
                 linkTo(methodOn(OrderController.class).getSingleOrder(createdOrder.getId())).withSelfRel()));
+    }catch(ProductNotFoundException ex){
+            throw ex;
+        }}
+
+
     }
-}

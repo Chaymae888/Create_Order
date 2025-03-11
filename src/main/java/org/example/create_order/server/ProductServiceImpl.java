@@ -1,5 +1,6 @@
 package org.example.create_order.server;
 
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.example.create_order.exceptions.ProductNotFoundException;
@@ -12,12 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
-@GrpcService // Auto-configures the gRPC service
+@GrpcService
 public class ProductServiceImpl extends ProductServiceGrpc.ProductServiceImplBase {
 
     private final ProductRepository productRepository;
 
-    @Autowired // Inject the ProductRepository
+    @Autowired
     public ProductServiceImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
@@ -41,10 +42,12 @@ public class ProductServiceImpl extends ProductServiceGrpc.ProductServiceImplBas
 
             System.out.println("gRPC Server: Sending product details for product ID: " + productId);
             responseObserver.onNext(response);
-            responseObserver.onCompleted();
         } else {
             System.out.println("gRPC Server: Product not found with ID: " + productId);
-            responseObserver.onError(new ProductNotFoundException(productId));
-        }
+            responseObserver.onError(Status.NOT_FOUND
+                    .withDescription("Product not found with ID: " + productId)
+                    .asRuntimeException());}
+
+        responseObserver.onCompleted();
     }
 }
