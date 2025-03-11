@@ -25,6 +25,8 @@ public class ProductServiceImpl extends ProductServiceGrpc.ProductServiceImplBas
     @Override
     public void getProductById(ProductRequest request, StreamObserver<ProductResponse> responseObserver) {
         String productId = request.getProductId();
+        System.out.println("gRPC Server responding to Step 2: Product details request for ID: " + productId);
+
         Optional<Product> productOptional = productRepository.findById(productId);
 
         if (productOptional.isPresent()) {
@@ -34,14 +36,15 @@ public class ProductServiceImpl extends ProductServiceGrpc.ProductServiceImplBas
                     .setName(product.getName())
                     .setDescription(product.getDescription())
                     .setPrice(product.getPrice())
-                    .setQuantity(product.getQuantity()) // Ensure quantity is set
+                    .setQuantity(product.getQuantity())
                     .build();
 
+            System.out.println("gRPC Server: Sending product details for product ID: " + productId);
             responseObserver.onNext(response);
+            responseObserver.onCompleted();
         } else {
+            System.out.println("gRPC Server: Product not found with ID: " + productId);
             responseObserver.onError(new ProductNotFoundException(productId));
         }
-
-        responseObserver.onCompleted();
     }
 }

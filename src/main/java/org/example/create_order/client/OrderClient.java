@@ -33,13 +33,14 @@ public class OrderClient {
      * @return ProductResponse containing product details.
      */
     public ProductResponse getProductById(String productId) {
-        // Create a ProductRequest with the given product ID
+        System.out.println("gRPC client requesting product details for ID: " + productId);
         ProductRequest request = ProductRequest.newBuilder()
                 .setProductId(productId)
                 .build();
 
-        // Call the getProductById method on the server using the stub
-        return productServiceBlockingStub.getProductById(request);
+        ProductResponse response = productServiceBlockingStub.getProductById(request);
+        System.out.println("gRPC: Received product details from ProductService for product ID: " + productId);
+        return response;
     }
 
 

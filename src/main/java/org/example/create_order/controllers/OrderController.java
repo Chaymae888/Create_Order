@@ -33,7 +33,7 @@ public class OrderController {
     @Autowired
     private OrderClient orderClient;
 
-    @GetMapping(produces = { "application/vnd.myapi.v1+json", "application/vnd.myapi.v1+xml" })
+    @GetMapping(produces = {"application/vnd.myapi.v1+json", "application/vnd.myapi.v1+xml"})
     public ResponseEntity<PagedModel<EntityModel<Order>>> getAllOrders(Pageable pageable) {
 
         Page<Order> ordersPage = orderService.allOrders(pageable);
@@ -59,7 +59,8 @@ public class OrderController {
                 linkTo(methodOn(OrderController.class).getAllOrders(null)).withSelfRel()
         );
     }
-    @GetMapping(value = "/{id}", produces = { "application/vnd.myapi.v1+json", "application/vnd.myapi.v1+xml" })
+
+    @GetMapping(value = "/{id}", produces = {"application/vnd.myapi.v1+json", "application/vnd.myapi.v1+xml"})
     public ResponseEntity<EntityModel<Order>> getSingleOrder(@PathVariable String id) {
         return orderService.singleOrder(id)
                 .map(this::createOrderEntityModel)
@@ -69,7 +70,8 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<EntityModel<Order>> createOrder(@RequestBody Order order) {
-        // Fetch product details from the ProductService
+        // Fetch product details from the ProductService using gRPC client
+        System.out.println("Client sends create order request for product ID: " + order.getProductId());
         ProductResponse productResponse = orderClient.getProductById(order.getProductId());
 
         // Convert ProductResponse to Product
@@ -80,12 +82,16 @@ public class OrderController {
         product.setPrice(productResponse.getPrice());
         product.setQuantity(productResponse.getQuantity());
 
-        Order createdOrder = orderService.createOrder(product, order);
+        // Set the initial state to CREATED
+        order.setState(Order.OrderState.CREATED);
 
-        // Return the created order as a response
+        // Create the order and process it synchronously
+        Order createdOrder = orderService.createAndProcessOrder(product, order);
+
+        System.out.println("Returning order response to client with ID: " + createdOrder.getId() +
+                " and state: " + createdOrder.getState());
+
         return ResponseEntity.ok(EntityModel.of(createdOrder,
                 linkTo(methodOn(OrderController.class).getSingleOrder(createdOrder.getId())).withSelfRel()));
     }
-
-
-    }
+}
